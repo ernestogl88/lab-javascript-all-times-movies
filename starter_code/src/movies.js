@@ -1,19 +1,19 @@
 /* eslint no-restricted-globals: 'off' */
 // Turn duration of the movies from hours to minutes 
 function turnHoursToMinutes(array){
-  var newArray = array.map((movie) => {
-    var duration = movie.duration
-    var minutes=0, idx
+  return array.map((movie) => {
+    var duration = movie.duration;
+    var minutes=0, idx;
 
-    if (typeof duration === "number") return {duration : duration}
+    if (typeof duration === "number") return {duration : duration};
 
     if (duration.indexOf("h") != -1 && duration.indexOf("m") != -1) {
       idx = duration.indexOf("h");
       minutes = duration[idx - 1] * 60;
 
       idx = duration.indexOf("m");
-      minutes += duration[idx - 2] * 10
-      minutes += parseInt(duration[idx - 1])
+      minutes += duration[idx - 2] * 10;
+      minutes += parseInt(duration[idx - 1]);
     }
 
     if (duration.indexOf("h") != -1){
@@ -23,21 +23,20 @@ function turnHoursToMinutes(array){
 
     if (duration.indexOf("m") != -1){
       idx = duration.indexOf("m");
-      minutes += duration[idx - 2] * 10
-      minutes += parseInt(duration[idx - 1])
+      minutes += duration[idx - 2] * 10;
+      minutes += parseInt(duration[idx - 1]);
     }
 
-    return Object.assign({},movie,{duration:minutes})    
+    return Object.assign({},movie,{duration:minutes}); 
   });
-
-  return newArray;
 }
 
 // Get the average of all rates with 2 decimals 
 
 function ratesAverage (array){
   var avg =  array.reduce((acum, movie) => {
-    return acum + movie.rate
+    if (movie.rate.length===0) return acum;
+    return acum += movie.rate;
   },0);
 
   return parseFloat((avg/array.length).toFixed(2));
@@ -48,10 +47,10 @@ function ratesAverage (array){
 function dramaMoviesRate (array){
 
   var dramaMovies = array.filter(movie=>{
-    return movie.genre.includes("Drama")
-  })
+    return movie.genre.includes("Drama");
+  });
 
-  if (dramaMovies.length===0) return undefined
+  if (dramaMovies.length===0) return undefined;
 
   return ratesAverage(dramaMovies);
 
@@ -62,19 +61,51 @@ function dramaMoviesRate (array){
 function orderByDuration (array){
   var goodDurationMovies = turnHoursToMinutes(array);
   var output = goodDurationMovies.sort((a, b) => {
-    if (a.duration === b.duration) return a.title - b.title
-    return a.duration - b.duration
+    if (a.duration > b.duration) return 1;
+    if (a.duration < b.duration) return -1;
+    if (a.title > b.title) return 1;
+    if (a.title > b.title) return -1;
+    return 0;
   });
-  output = output.map(movie=> {
-    return {duration : movie.duration}
-  });
-  return output
+  return output;
 }
 
 // How many movies did STEVEN SPIELBERG
 
+function howManyMovies (array){
+  if (array.length === 0) return undefined;
+  var output = array.filter(movie=> movie.director === "Steven Spielberg");
+  output = output.filter(movie=> movie.genre.includes("Drama"));
+  output = output.length;
+  return `Steven Spielberg directed ${output} drama movies!`;
+}
 
 // Order by title and print the first 20 titles
 
+function orderAlphabetically (array){
+  var output = array.map(movie=>movie.title);
+  return output.sort().splice(0,20);
+}
 
 // Best yearly rate average
+
+function bestYearAvg(movies) {
+  if (movies.length === 0) { return undefined }
+
+  var bestYear = '';
+  var bestRate = 0;
+  var rate;
+
+  movies.forEach(movie => {
+    var sameYearMovies = movies.filter((movieFilter) => movieFilter.year === movie.year);
+
+    rate = ratesAverage(sameYearMovies);
+
+    if (rate >= bestRate) {
+      bestRate = rate;
+      bestYear = movie.year;
+    }
+  });
+  return (`The best year was ${bestYear} with an average rate of ${bestRate}`);
+
+}
